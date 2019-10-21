@@ -1,8 +1,43 @@
 import * as Yup from 'yup';
+import { startOfHour, parseISO, isBefore } from 'date-fns';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
+import File from '../models/File';
 
 class AppointmentController {
+  async index(req, res) {
+    const { page = 1 } = req.query;
+
+    /**
+     * Lista todos agendamentos do usuario, não cancelados, ordenados por data,
+     * populando o relacionamento com provider e o campo avatar do provider,
+     * paginado com 20 registros por pagina
+     */
+    const appointments = await Appointment.findAll({
+      where: { user_id: req.userId, canceled_at: null },
+      order: ['date'],
+      attributes: ['id', 'date'],
+      limit: 20,
+      offset: (page - 1) * 20,
+      include: [
+        {
+          model: User,
+          as: 'provider',
+          attributes: ['id', 'name'],
+          include: [
+            {
+              model: File,
+              as: 'avatar',
+              attributes: ['id', 'path', 'url']
+            }
+          ]
+        }
+      ]
+    });
+
+    return res.json(appointments);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       provider_id: Yup.number().required(),
@@ -24,10 +59,29 @@ class AppointmentController {
         error: 'Você só pode fazer um agendamento com um prestador de serviços'
       });
 
+    // Verifica se o horario de agendamento ja passou
+    // startOfHour retorna apenas a hora passada, descartando minutos e segundos
+    // parseISO transforma o objeto JSON em formado Date do JS
+    const hourStart = startOfHour(parseISO(date));
+    if (isBefore(hourStart, new Date()))
+      return res.status(400).json({ error: 'Horário já passou' });
+
+    // Verifica disponibilidade do horario de agendamento com o prestador de servicos especificado
+    const checkAvailability = await Appointment.findOne({
+      where: {
+        provider_id,
+        canceled_at: null,
+        date: hourStart
+      }
+    });
+
+    if (checkAvailability)
+      return res.status(400).json({ error: 'Horário não disponível' });
+
     const appointment = await Appointment.create({
       user_id: req.userId,
       provider_id,
-      date
+      date: hourStart
     });
 
     return res.json(appointment);
