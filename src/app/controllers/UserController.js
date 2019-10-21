@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
-import User from '../models/user';
+import User from '../models/User';
+import File from '../models/File';
 
 class UserController {
   // Cadastrar
@@ -27,10 +28,25 @@ class UserController {
       return res.status(400).json({ message: 'Email já cadastrado' });
     }
 
-    // Cadastra usuário
-    const { id, name, email, provider } = await User.create(req.body);
+    /* let { avatar_id } = req.body;
 
-    return res.json({ id, name, email, provider });
+    if (avatar_id) {
+      const fileExists = await File.findOne({
+        where: { id: avatar_id }
+      });
+
+      if (!fileExists) {
+        return res.status(400).json({ message: 'Arquivo não encontrado' });
+      }
+    } else avatar_id = null; */
+
+    // Cadastra usuário
+    const { id, name, email, provider, avatar_id } = await User.create({
+      ...req.body,
+      avatar_id: null
+    });
+
+    return res.json({ id, name, email, provider, avatar_id });
   }
 
   // Editar
@@ -38,12 +54,14 @@ class UserController {
     const schema = Yup.object().shape({
       name: Yup.string(),
       email: Yup.string().email(),
-      oldPassword: Yup.string().min(6),
-      password: Yup.string()
+      oldPassword: Yup.string()
         .min(6)
-        .when('oldPassword', (oldPassword, field) =>
-          oldPassword ? field.required() : field
+        .when('password', (password, field) =>
+          password ? field.required() : field
         ),
+      /* Caso password tenha sido preenchido,
+      tanto oldPassword quanto passwordConfirm serão required */
+      password: Yup.string().min(6),
       confirmPassword: Yup.string().when('password', (password, field) =>
         password ? field.required().oneOf([Yup.ref('password')]) : field
       )
@@ -52,7 +70,7 @@ class UserController {
     if (!(await schema.isValid(req.body)))
       return res.status(400).json({ error: 'Erro de validação' });
 
-    const { email, oldPassword } = req.body;
+    const { email, oldPassword, avatar_id } = req.body;
 
     // Busca usuário a ser editado pela Id do usuário logado
     const user = await User.findByPk(req.userId);
@@ -68,22 +86,41 @@ class UserController {
       }
     }
 
-    if (req.body.password && !oldPassword)
-      return res.status(400).json({ error: 'Erro de validação' });
+    if (avatar_id !== user.avatar_id) {
+      const fileExists = await File.findOne({
+        where: { id: avatar_id }
+      });
+
+      if (!fileExists) {
+        return res.status(400).json({ message: 'Arquivo não encontrado' });
+      }
+    }
+
     // Caso for alterar senha, verifica se a senha antiga está correta
-    if (!(await user.checkPassword(oldPassword))) {
+    if (oldPassword && !(await user.checkPassword(oldPassword))) {
       return res.status(401).json({ message: 'Senha inválida' });
     }
 
     // Atualiza dados do usuário
     const { id, name, provider } = await user.update(req.body);
 
-    return res.json({ id, name, email, provider });
+    return res.json({ id, name, email, provider, avatar_id });
   }
 
-  async list(req, res) {
+  async index(req, res) {
     if (!req.params.userId) {
-      const users = await User.findAll();
+      const users = await User.findAll({
+        // Campos a serem retornados
+        attributes: ['id', 'name', 'email', 'provider'],
+        // Populate os relacionamento com as seguintes models
+        include: [
+          {
+            model: File,
+            as: 'avatar',
+            attributes: ['name', 'path']
+          }
+        ]
+      });
 
       // eslint-disable-next-line eqeqeq
       if (users == '')
@@ -99,11 +136,21 @@ class UserController {
     if (!emailExists)
       return res.status(400).json({ message: 'Usuário não encontrado' });
 
-    const { id, name, email, provider } = await User.findOne({
-      where: { id: req.params.userId }
+    const user = await User.findOne({
+      where: { id: req.params.userId },
+      // Campos a serem retornados
+      attributes: ['id', 'name', 'email', 'provider'],
+      // Populate os relacionamento com as seguintes models
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['name', 'path']
+        }
+      ]
     });
 
-    return res.json({ id, name, email, provider });
+    return res.json(user);
   }
 }
 
