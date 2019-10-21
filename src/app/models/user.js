@@ -23,6 +23,8 @@ class User extends Model {
     return this;
   }
 
+  // Faz o relacionamento do campo avatar_id com a tabela File
+  // N(usuarios):1(avatar)
   static associate(models) {
     this.belongsTo(models.File, { foreignKey: 'avatar_id', as: 'avatar' }); // Cria um alias chamado 'avatar' para a foreign_key
   }
