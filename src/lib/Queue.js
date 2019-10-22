@@ -46,8 +46,12 @@ class Queue {
       // Extrai apenas bee e handle de cada job
       const { bee, handle } = this.queues[job.key];
 
-      bee.process(handle);
+      bee.on('failed', this.handleFailure).process(handle);
     });
+  }
+
+  handleFailure(job, err) {
+    console.log(`Queue ${job.queue.name} ***FALHOU***`, err);
   }
 }
 
