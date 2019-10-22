@@ -1,8 +1,10 @@
 import * as Yup from 'yup';
-import { startOfHour, parseISO, isBefore } from 'date-fns';
+import { startOfHour, parseISO, isBefore, format } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
+import Notification from '../schemas/Notification';
 
 class AppointmentController {
   async index(req, res) {
@@ -59,6 +61,10 @@ class AppointmentController {
         error: 'Você só pode fazer um agendamento com um prestador de serviços'
       });
 
+    if (provider_id === req.userId)
+      return res.status(401).json({
+        error: 'Não é possível agendar um horário com você mesmo'
+      });
     // Verifica se o horario de agendamento ja passou
     // startOfHour retorna apenas a hora passada, descartando minutos e segundos
     // parseISO transforma o objeto JSON em formado Date do JS
@@ -82,6 +88,23 @@ class AppointmentController {
       user_id: req.userId,
       provider_id,
       date: hourStart
+    });
+
+    /**
+     * Notificar reserva ao prestador de servico
+     */
+
+    const user = await User.findByPk(req.userId);
+    // Formatacao da data
+    const formattedDate = await format(
+      hourStart,
+      "'dia' dd 'de' MMMM', às' H:mm'h'",
+      { locale: pt }
+    );
+
+    await Notification.create({
+      content: `Novo agendamento de ${user.name} para ${formattedDate}`,
+      user: provider_id
     });
 
     return res.json(appointment);
