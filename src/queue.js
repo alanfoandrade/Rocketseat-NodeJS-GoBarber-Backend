@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Queue from './lib/Queue';
 
 // Processa queue em um node separado,
