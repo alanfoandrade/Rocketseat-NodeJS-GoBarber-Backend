@@ -27,9 +27,6 @@ class ScheduleController {
         attributes: ['id', 'date'],
         limit: 20,
         offset: (page - 1) * 20,
-        date: {
-          [Op.between]: [startOfDay(parsedDate), endOfDay(parsedDate)]
-        },
         include: [
           {
             model: User,
@@ -65,9 +62,6 @@ class ScheduleController {
       attributes: ['id', 'date'],
       limit: 20,
       offset: (page - 1) * 20,
-      date: {
-        [Op.between]: [startOfDay(parsedDate), endOfDay(parsedDate)]
-      },
       include: [
         {
           model: User,
