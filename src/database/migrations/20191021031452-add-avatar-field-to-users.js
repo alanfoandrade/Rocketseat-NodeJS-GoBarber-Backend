@@ -6,11 +6,11 @@ module.exports = {
       onUpdate: 'CASCADE',
       onDelete: 'SET NULL',
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     });
   },
 
   down: queryInterface => {
     return queryInterface.removeColumn('users', 'avatar_id');
-  }
+  },
 };

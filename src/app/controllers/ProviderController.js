@@ -11,9 +11,9 @@ class ProviderController {
         {
           model: File,
           as: 'avatar',
-          attributes: ['name', 'path']
-        }
-      ]
+          attributes: ['name', 'path'],
+        },
+      ],
     });
 
     return res.json(providers);

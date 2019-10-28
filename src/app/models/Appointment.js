@@ -13,15 +13,15 @@ class Appointment extends Model {
           get() {
             // retorna true caso horário já tenha passado
             return isBefore(this.date, new Date());
-          }
+          },
         },
         cancelable: {
           type: Sequelize.VIRTUAL,
           // verifica se o horário atual é no mínimo 2 horas antes do agendamento
           get() {
             return isBefore(new Date(), subHours(this.date, 2));
-          }
-        }
+          },
+        },
       },
       { sequelize }
     );

@@ -5,19 +5,19 @@ const NotificationSchema = new mongoose.Schema(
     // Conteudo da notificacao
     content: {
       type: String,
-      required: true
+      required: true,
     },
     // Id do usuario que vai receber a notificacao
     user: {
       type: Number,
-      required: true
+      required: true,
     },
     // Lida
     read: {
       type: Boolean,
       required: true,
-      default: false
-    }
+      default: false,
+    },
   },
   { timestamps: true }
 );

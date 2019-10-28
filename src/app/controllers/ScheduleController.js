@@ -7,7 +7,7 @@ import File from '../models/File';
 class ScheduleController {
   async index(req, res) {
     const isProvider = await User.findOne({
-      where: { id: req.userId, provider: true }
+      where: { id: req.userId, provider: true },
     });
 
     if (!isProvider)
@@ -21,7 +21,7 @@ class ScheduleController {
       const appointments = await Appointment.findAll({
         where: {
           provider_id: req.userId,
-          canceled_at: null
+          canceled_at: null,
         },
         order: ['date'],
         attributes: ['id', 'date'],
@@ -36,11 +36,11 @@ class ScheduleController {
               {
                 model: File,
                 as: 'avatar',
-                attributes: ['id', 'path', 'url']
-              }
-            ]
-          }
-        ]
+                attributes: ['id', 'path', 'url'],
+              },
+            ],
+          },
+        ],
       });
       return res.json(appointments);
     }
@@ -55,8 +55,8 @@ class ScheduleController {
         provider_id: req.userId,
         canceled_at: null,
         date: {
-          [Op.between]: [startOfDay(parsedDate), endOfDay(parsedDate)]
-        }
+          [Op.between]: [startOfDay(parsedDate), endOfDay(parsedDate)],
+        },
       },
       order: ['date'],
       attributes: ['id', 'date'],
@@ -71,11 +71,11 @@ class ScheduleController {
             {
               model: File,
               as: 'avatar',
-              attributes: ['id', 'path', 'url']
-            }
-          ]
-        }
-      ]
+              attributes: ['id', 'path', 'url'],
+            },
+          ],
+        },
+      ],
     });
 
     return res.json(appointments);

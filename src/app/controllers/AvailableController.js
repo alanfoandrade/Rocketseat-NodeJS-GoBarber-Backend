@@ -5,7 +5,7 @@ import {
   setMinutes,
   setSeconds,
   format,
-  isAfter
+  isAfter,
 } from 'date-fns';
 import { Op } from 'sequelize';
 import Appointment from '../models/Appointment';
@@ -25,9 +25,9 @@ class AvailableController {
         provider_id: req.params.providerId,
         canceled_at: null,
         date: {
-          [Op.between]: [startOfDay(searchDate), endOfDay(searchDate)]
-        }
-      }
+          [Op.between]: [startOfDay(searchDate), endOfDay(searchDate)],
+        },
+      },
     });
 
     const schedule = [
@@ -42,7 +42,7 @@ class AvailableController {
       '16:00',
       '17:00',
       '18:00',
-      '19:00'
+      '19:00',
     ];
 
     const available = schedule.map(time => {
@@ -62,7 +62,7 @@ class AvailableController {
          * */
         available:
           isAfter(value, new Date()) &&
-          !appointments.find(a => format(a.date, 'HH:mm') === time)
+          !appointments.find(a => format(a.date, 'HH:mm') === time),
       };
     });
 

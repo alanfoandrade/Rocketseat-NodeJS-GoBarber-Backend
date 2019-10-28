@@ -11,7 +11,7 @@ class SessionController {
       email: Yup.string()
         .email()
         .required(),
-      password: Yup.string().required()
+      password: Yup.string().required(),
     });
 
     if (!(await schema.isValid(req.body)))
@@ -26,9 +26,9 @@ class SessionController {
         {
           model: File,
           as: 'avatar',
-          attributes: ['name', 'path', 'url']
-        }
-      ]
+          attributes: ['name', 'path', 'url'],
+        },
+      ],
     });
 
     if (!user) {
@@ -47,11 +47,11 @@ class SessionController {
         name,
         email,
         provider,
-        avatar: user.avatar
+        avatar: user.avatar,
       },
       token: jwt.sign({ id }, authConfig.secret, {
-        expiresIn: authConfig.expiresIn
-      })
+        expiresIn: authConfig.expiresIn,
+      }),
     });
   }
 }

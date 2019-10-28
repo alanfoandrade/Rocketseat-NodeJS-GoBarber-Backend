@@ -13,7 +13,7 @@ class UserController {
         .required(),
       password: Yup.string()
         .required()
-        .min(6)
+        .min(6),
     });
 
     if (!(await schema.isValid(req.body)))
@@ -21,7 +21,7 @@ class UserController {
 
     // Verifica se email já está cadastrado
     const emailExists = await User.findOne({
-      where: { email: req.body.email }
+      where: { email: req.body.email },
     });
 
     if (emailExists) {
@@ -43,7 +43,7 @@ class UserController {
     // Cadastra usuário
     const { id, name, email, provider, avatar_id } = await User.create({
       ...req.body,
-      avatar_id: null
+      avatar_id: null,
     });
 
     return res.json({ id, name, email, provider, avatar_id });
@@ -64,7 +64,7 @@ class UserController {
       password: Yup.string().min(6),
       confirmPassword: Yup.string().when('password', (password, field) =>
         password ? field.required().oneOf([Yup.ref('password')]) : field
-      )
+      ),
     });
 
     if (!(await schema.isValid(req.body)))
@@ -75,10 +75,15 @@ class UserController {
     // Busca usuário a ser editado pela Id do usuário logado
     const user = await User.findByPk(req.userId);
 
+    if (!user)
+      return res
+        .status(401)
+        .json({ error: 'Erro de autenticação, faça login novamente' });
+
     // Caso for alterar email, verifica se novo email já está cadastrado
     if (email !== user.email) {
       const emailExists = await User.findOne({
-        where: { email }
+        where: { email },
       });
 
       if (emailExists) {
@@ -88,7 +93,7 @@ class UserController {
 
     if (avatar_id !== user.avatar_id) {
       const fileExists = await File.findOne({
-        where: { id: avatar_id }
+        where: { id: avatar_id },
       });
 
       if (!fileExists) {
@@ -117,9 +122,9 @@ class UserController {
           {
             model: File,
             as: 'avatar',
-            attributes: ['name', 'path']
-          }
-        ]
+            attributes: ['name', 'path'],
+          },
+        ],
       });
 
       // eslint-disable-next-line eqeqeq
@@ -130,7 +135,7 @@ class UserController {
     }
 
     const emailExists = await User.findOne({
-      where: { id: req.params.userId }
+      where: { id: req.params.userId },
     });
 
     if (!emailExists)
@@ -145,9 +150,9 @@ class UserController {
         {
           model: File,
           as: 'avatar',
-          attributes: ['name', 'path']
-        }
-      ]
+          attributes: ['name', 'path'],
+        },
+      ],
     });
 
     return res.json(user);
