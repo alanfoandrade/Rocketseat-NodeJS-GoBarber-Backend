@@ -60,7 +60,7 @@ class UserController {
           password ? field.required() : field
         ),
       /* Caso password tenha sido preenchido,
-      tanto oldPassword quanto passwordConfirm serão required */
+      tanto oldPassword quanto confirmPassword serão required */
       password: Yup.string().min(6),
       confirmPassword: Yup.string().when('password', (password, field) =>
         password ? field.required().oneOf([Yup.ref('password')]) : field
@@ -81,7 +81,7 @@ class UserController {
         .json({ error: 'Erro de autenticação, faça login novamente' });
 
     // Caso for alterar email, verifica se novo email já está cadastrado
-    if (email !== user.email) {
+    if (email && email !== user.email) {
       const emailExists = await User.findOne({
         where: { email },
       });
@@ -91,7 +91,7 @@ class UserController {
       }
     }
 
-    if (avatar_id !== user.avatar_id) {
+    if (avatar_id && avatar_id !== user.avatar_id) {
       const fileExists = await File.findOne({
         where: { id: avatar_id },
       });
