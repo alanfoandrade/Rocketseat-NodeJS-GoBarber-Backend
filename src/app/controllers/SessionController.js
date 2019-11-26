@@ -26,7 +26,7 @@ class SessionController {
         {
           model: File,
           as: 'avatar',
-          attributes: ['name', 'path', 'url'],
+          attributes: ['id', 'path', 'url'],
         },
       ],
     });
@@ -39,7 +39,7 @@ class SessionController {
       return res.status(401).json({ message: 'Senha inválida' });
     }
 
-    const { id, name, provider } = user;
+    const { id, name, avatar, provider } = user;
 
     return res.json({
       user: {
@@ -47,7 +47,7 @@ class SessionController {
         name,
         email,
         provider,
-        avatar: user.avatar,
+        avatar,
       },
       token: jwt.sign({ id }, authConfig.secret, {
         expiresIn: authConfig.expiresIn,

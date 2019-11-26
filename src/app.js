@@ -4,6 +4,7 @@ import path from 'path';
 import * as Sentry from '@sentry/node';
 import Youch from 'youch';
 import 'express-async-errors';
+import cors from 'cors';
 import routes from './routes';
 import sentryConfig from './config/sentryConfig';
 import './database';
@@ -21,6 +22,7 @@ class App {
 
   middlewares() {
     this.server.use(Sentry.Handlers.requestHandler());
+    this.server.use(cors());
     this.server.use(express.json());
 
     // Servir arquivos estaticos (imagem, css, html) para serem acessados diretamente pelo navegador

@@ -23,9 +23,9 @@ class Queue {
        */
       this.queues[key] = {
         bee: new BeeQueue(key, {
-          redis: redisConfig
+          redis: redisConfig,
         }),
-        handle
+        handle,
       };
     });
   }
