@@ -52,8 +52,10 @@ class UserController {
   // Editar
   async update(req, res) {
     const schema = Yup.object().shape({
-      name: Yup.string(),
-      email: Yup.string().email(),
+      name: Yup.string().min(3),
+      email: Yup.string()
+        .email()
+        .min(6),
       oldPassword: Yup.string()
         .min(6)
         .when('password', (password, field) =>

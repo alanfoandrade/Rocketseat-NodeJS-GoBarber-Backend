@@ -6,6 +6,7 @@ import {
   setSeconds,
   format,
   isAfter,
+  parseISO,
 } from 'date-fns';
 import { Op } from 'sequelize';
 import Appointment from '../models/Appointment';
@@ -18,7 +19,7 @@ class AvailableController {
       return res.status(400).json({ error: 'Data inválida' });
     }
 
-    const searchDate = Number(date);
+    const searchDate = parseISO(date);
 
     const appointments = await Appointment.findAll({
       where: {
@@ -30,7 +31,7 @@ class AvailableController {
       },
     });
 
-    const schedule = [
+    const schedSchema = [
       '08:00',
       '09:00',
       '10:00',
@@ -43,11 +44,12 @@ class AvailableController {
       '17:00',
       '18:00',
       '19:00',
+      '20:00',
     ];
 
-    const available = schedule.map(time => {
+    const schedule = schedSchema.map(time => {
       const [hour, minute] = time.split(':');
-      // Formata searchDate para bater com o formato acima HH:MM
+      // Formata searchDate conforme o formato acima HH:MM
       const value = setSeconds(
         setMinutes(setHours(searchDate, hour), minute),
         0
@@ -66,7 +68,7 @@ class AvailableController {
       };
     });
 
-    return res.json(available);
+    return res.json(schedule);
   }
 }
 
