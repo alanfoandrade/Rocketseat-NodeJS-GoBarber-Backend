@@ -21,6 +21,7 @@ class App {
   }
 
   middlewares() {
+    this.server.use((req, res, next) => setTimeout(next, 1000));
     this.server.use(Sentry.Handlers.requestHandler());
     this.server.use(cors());
     this.server.use(express.json());
