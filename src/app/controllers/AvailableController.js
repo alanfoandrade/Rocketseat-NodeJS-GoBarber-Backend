@@ -6,7 +6,7 @@ import {
   setSeconds,
   format,
   isAfter,
-  parseISO,
+  toDate,
 } from 'date-fns';
 import { Op } from 'sequelize';
 import Appointment from '../models/Appointment';
@@ -19,7 +19,7 @@ class AvailableController {
       return res.status(400).json({ error: 'Data inválida' });
     }
 
-    const searchDate = parseISO(date);
+    const searchDate = toDate(Number(date));
 
     const appointments = await Appointment.findAll({
       where: {
